@@ -2,8 +2,8 @@
 using MongoDB.Entities;
 using SearchService.Models;
 
-namespace SearchService;
-
+namespace SearchService
+{
 public class AuctionServiceHttpClient
 {
     private readonly IConfiguration _config;
@@ -15,13 +15,15 @@ public class AuctionServiceHttpClient
         _httpClient = httpClient;
     }
 
-    public async Task<List<Item>> GetItemsForSearchDb()
-    {
-        var lastUpdated = await DB.Find<Item, string>()
-            .Sort(x => x.Descending(x => x.UpdatedAt))
-            .Project(x => x.UpdatedAt.ToString())
-            .ExecuteFirstAsync();
+        public async Task<List<Item>> GetItemsForSearchDb()
+        {
+            var lastUpdated = await DB.Find<Item, string>()
+                .Sort(x => x.Descending(x => x.UpdatedAt))
+                .Project(x => x.UpdatedAt.ToString())
+                .ExecuteFirstAsync();
 
-        return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrlCodespace"]+"api/auctions/date="+lastUpdated);
+            return await _httpClient.GetFromJsonAsync<List<Item>>(_config["AuctionServiceUrl"]
+                + "/api/auctions?date=" + lastUpdated);
+        }
     }
-}
+};
