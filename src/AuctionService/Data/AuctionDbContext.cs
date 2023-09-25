@@ -1,4 +1,5 @@
-﻿ using AuctionService.Models;
+﻿using AuctionService.Models;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuctionService.Data
@@ -10,5 +11,14 @@ namespace AuctionService.Data
         }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<Item> Items { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.AddInboxStateEntity();
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+        }
     }
 }

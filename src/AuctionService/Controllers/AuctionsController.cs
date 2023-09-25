@@ -49,9 +49,9 @@ public class AuctionsController : ControllerBase
 
         var newAuction = _mapper.Map<AuctionDto>(auction);
 
-        var result = await _repo.SaveChangesAsync();
-
         await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(newAuction));
+        
+        var result = await _repo.SaveChangesAsync();
 
         if (!result) return BadRequest("Could not save changes to the DB");
 
@@ -74,6 +74,7 @@ public class AuctionsController : ControllerBase
         auction.Item.Mileage = updateAuctionDto.Mileage ?? auction.Item.Mileage;
         auction.Item.Year = updateAuctionDto.Year ?? auction.Item.Year;
 
+        await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
 
         var result = await _repo.SaveChangesAsync();
 
@@ -91,6 +92,8 @@ public class AuctionsController : ControllerBase
         if (auction == null) return NotFound();
 
         _repo.RemoveAuction(auction);
+
+        await _publishEndpoint.Publish(_mapper.Map<AuctionDeleted>(new {Id = auction.Id}));
 
         var result = await _repo.SaveChangesAsync();
 
