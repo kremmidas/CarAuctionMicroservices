@@ -40,10 +40,14 @@ public class AuctionsController : ControllerBase
         return auction;
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<AuctionDto>> CreateAuction(CreateAuctionDto auctionDto)
     {
+       
         var auction = _mapper.Map<Auction>(auctionDto);
+
+        auction.Seller = User.Identity.Name;
 
         _repo.AddAuction(auction);
 
@@ -65,6 +69,7 @@ public class AuctionsController : ControllerBase
     {
         var auction = await _repo.GetAuctionEntityById(id);
 
+        if(auction.Seller != User.Identity.Name) return Forbid();
         if (auction == null) return NotFound();
 
 
@@ -88,6 +93,8 @@ public class AuctionsController : ControllerBase
     public async Task<ActionResult> DeleteAuction(Guid id)
     {
         var auction = await _repo.GetAuctionEntityById(id);
+
+        if (auction.Seller != User.Identity.Name) return Forbid();
 
         if (auction == null) return NotFound();
 
